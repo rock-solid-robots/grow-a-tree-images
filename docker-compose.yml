@@ -1,0 +1,12 @@
+version: '3'
+
+services:
+
+  tiling-image-server:
+    container_name: tiling-image-server
+    image: tiling-image-server:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - /var/www/tiling-images:/var/www/tiling-images
+    restart: unless-stopped
