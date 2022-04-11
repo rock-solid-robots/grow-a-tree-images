@@ -1,17 +1,11 @@
-use image::{DynamicImage, GenericImageView, Pixel, RgbaImage};
-use uuid::Uuid;
-
 use crate::tiles::{TileMap, Tileset};
-use std::time::Instant;
+use image::{DynamicImage, GenericImageView, ImageBuffer, Pixel, Rgba, RgbaImage};
 
-pub fn create_image(tileset: &Tileset, tilemap: &TileMap, id: &str) -> String {
-  let start = Instant::now();
-
+pub fn create_image(tileset: &Tileset, tilemap: &TileMap) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
   let img_width = tileset.width * tilemap.width;
   let img_height = tileset.height * tilemap.height;
 
   let mut image = RgbaImage::new(img_width, img_height);
-  println!("Creating image of size ({}, {})", img_width, img_height);
 
   for (i, layer) in tilemap.tiles.iter().enumerate() {
     for (x, column) in layer.iter().enumerate() {
@@ -48,15 +42,5 @@ pub fn create_image(tileset: &Tileset, tilemap: &TileMap, id: &str) -> String {
     }
   }
 
-  let path = format!("/var/www/tiling-images/{}.png", id);
-
-  image.save(path).unwrap();
-
-  let uuid = Uuid::new_v4();
-
-  let url = format!("https://cdn.milesmoonlove.com/{}.png?{}", id, uuid);
-
-  println!("Created image {} in {:?}", url, start.elapsed());
-
-  return url;
+  return image;
 }
