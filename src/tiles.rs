@@ -5,59 +5,58 @@ use std::collections::HashMap;
 
 use image::DynamicImage;
 
-#[derive(Clone)]
-pub struct TileRefMap {
-  pub tiles: Vec<Vec<TileRef>>,
+pub type TileId = u16;
+
+#[derive(Deserialize, Debug)]
+pub struct TileMap {
+  pub tiles: Vec<Vec<Vec<TileId>>>,
+
+  pub width: u32,
+  pub height: u32,
 }
 
-#[derive(Clone)]
-pub struct TileRef {
-  pub id: u32,
+// Tilesets
 
-  pub overlay: bool,
+pub struct Tileset {
+  pub tiles: HashMap<TileId, DynamicImage>,
+  pub width: u32,
+  pub height: u32,
 }
 
-pub struct Tile {
-  pub id: u32,
-
-  pub image: DynamicImage,
+pub struct TilesetManager {
+  pub tilesets: HashMap<String, Tileset>,
 }
 
-pub struct TileManager {
-  tilesets: HashMap<String, Vec<Tile>>,
-}
-
-impl TileManager {
+impl TilesetManager {
   pub fn new() -> Self {
-    let tilesets: HashMap<String, Vec<Tile>> = HashMap::new();
-
-    return TileManager { tilesets };
+    return TilesetManager {
+      tilesets: HashMap::new(),
+    };
   }
 
-  pub fn load(mut self: Self, name: String, directory: &str) -> Self {
-    let tiles = self.tilesets.entry(name).or_insert(Vec::new());
+  pub fn load(mut self: Self, name: String, directory: &str, width: u32, height: u32) -> Self {
+    let tileset: &mut Tileset = self.tilesets.entry(name).or_insert(Tileset {
+      tiles: HashMap::new(),
+      width,
+      height,
+    });
 
     let path: &Path = Path::new(directory);
 
-    if !path.exists() {
-      panic!("Directory not found: {}", directory);
-    }
+    assert!(path.exists(), "Directory not found: {}", directory);
 
-    let start = Instant::now();
-    let mut i = 0;
+    let start: Instant = Instant::now();
+    let mut i: TileId = 0;
 
     loop {
-      let image = match ImageReader::open(path) {
+      let image = match ImageReader::open(format!("{}/{}.png", directory, i)) {
         Ok(file) => file.with_guessed_format().unwrap().decode(),
         Err(_) => break,
       };
 
       match image {
         Ok(image) => {
-          tiles.push(Tile {
-            id: i,
-            image: image,
-          });
+          tileset.tiles.entry(i).or_insert(image);
 
           println!("Loaded tile: {}/{}.png", directory, i);
         }
