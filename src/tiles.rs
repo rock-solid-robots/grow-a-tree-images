@@ -1,9 +1,7 @@
 use std::{path::Path, time::Instant};
 
-use image::io::Reader as ImageReader;
+use image::{io::Reader as ImageReader, RgbaImage};
 use std::collections::HashMap;
-
-use image::DynamicImage;
 
 pub type TileId = u16;
 
@@ -18,7 +16,7 @@ pub struct TileMap {
 // Tilesets
 
 pub struct Tileset {
-  pub tiles: HashMap<TileId, DynamicImage>,
+  pub tiles: HashMap<TileId, RgbaImage>,
   pub width: u32,
   pub height: u32,
 }
@@ -56,7 +54,7 @@ impl TilesetManager {
 
       match image {
         Ok(image) => {
-          tileset.tiles.entry(i).or_insert(image);
+          tileset.tiles.entry(i).or_insert(image.into_rgba8());
 
           println!("Loaded tile: {}/{}.png", directory, i);
         }
