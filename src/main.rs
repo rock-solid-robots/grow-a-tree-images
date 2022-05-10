@@ -13,8 +13,7 @@ use std::fs;
 
 use rocket::State;
 use rocket_contrib::json::{Json, JsonValue};
-use tiles::TileMap;
-use uuid::Uuid;
+use tiles::{TileId, TileMap};
 
 use crate::tiles::TilesetManager;
 
@@ -67,9 +66,43 @@ fn handle_request(
 
   image.save(path).unwrap();
 
-  let uuid = Uuid::new_v4();
+  let url = format!("{}/{}.png", config.domain, data.id);
 
-  let url = format!("{}/{}.png?{}", config.domain, data.id, uuid);
+  json!({ "status": "ok", "url": url })
+}
+
+#[derive(Deserialize)]
+struct TreeRequest {
+  pub id: String,
+
+  pub pieces: Vec<TileId>,
+}
+
+#[post("/tree", format = "json", data = "<data>")]
+fn render_partial_tree(
+  tileset_manager: State<TilesetManager>,
+  config: State<Config>,
+  data: Json<TreeRequest>,
+) -> JsonValue {
+  let tileset = tileset_manager.tilesets.get("trees").unwrap();
+
+  let tilemap = TileMap {
+    tiles: vec![vec![data.pieces.clone()]],
+
+    width: 1,
+    height: data.pieces.len() as u32,
+  };
+
+  let image = match data.pieces.len() > 3 {
+    true => render::render_treetop(render::create_image(tileset, &tilemap)),
+    false => render::render_sapling(data.pieces.len() as u32),
+  };
+
+  let path = format!("{}/{}-treetop.png", config.directory, data.id);
+
+  image.save(path).unwrap();
+
+  let url = format!("{}/{}-treetop.png", config.domain, data.id);
 
   json!({ "status": "ok", "url": url })
 }
