@@ -32,14 +32,14 @@ impl TilesetManager {
     };
   }
 
-  pub fn load(mut self: Self, name: String, directory: &str, width: u32, height: u32) -> Self {
-    let tileset: &mut Tileset = self.tilesets.entry(name).or_insert(Tileset {
+  pub fn load(mut self: Self, name: &str, directory: &str, width: u32, height: u32) -> Self {
+    let tileset: &mut Tileset = self.tilesets.entry(name.to_string()).or_insert(Tileset {
       tiles: HashMap::new(),
       width,
       height,
     });
 
-    let path: &Path = Path::new(directory);
+    let path: &Path = Path::new(&directory);
 
     assert!(path.exists(), "Directory not found: {}", directory);
 

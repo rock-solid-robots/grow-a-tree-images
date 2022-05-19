@@ -1,7 +1,7 @@
 use crate::tiles::{TileMap, Tileset};
-use image::{imageops, io::Reader as ImageReader, ImageBuffer, Pixel, Rgba, RgbaImage};
+use image::{Pixel, RgbaImage};
 
-pub fn create_image(tileset: &Tileset, tilemap: &TileMap) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
+pub fn render_tiles(tileset: &Tileset, tilemap: &TileMap) -> RgbaImage {
   let img_width = tileset.width * tilemap.width;
   let img_height = tileset.height * tilemap.height;
 
@@ -35,64 +35,4 @@ pub fn create_image(tileset: &Tileset, tilemap: &TileMap) -> ImageBuffer<Rgba<u8
   }
 
   return image;
-}
-
-pub fn render_treetop(
-  trunk: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-  tree_top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-  background: &ImageBuffer<Rgba<u8>, Vec<u8>>,
-) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
-  let mut image = RgbaImage::new(760, 464 + trunk.height());
-
-  imageops::overlay(&mut image, background, 0, 0);
-  imageops::overlay(&mut image, tree_top, 0, 0);
-  imageops::overlay(&mut image, trunk, 207, 464);
-
-  return image;
-}
-
-pub fn render_sapling(size: u32) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
-  let loaded_sapling1 = match ImageReader::open("saplings/sapling1.png") {
-    Ok(file) => file.with_guessed_format().unwrap().decode(),
-    Err(_) => std::process::exit(0),
-  };
-
-  let loaded_sapling2 = match ImageReader::open("saplings/sapling2.png") {
-    Ok(file) => file.with_guessed_format().unwrap().decode(),
-    Err(_) => std::process::exit(0),
-  };
-
-  let loaded_sapling3 = match ImageReader::open("saplings/sapling3.png") {
-    Ok(file) => file.with_guessed_format().unwrap().decode(),
-    Err(_) => std::process::exit(0),
-  };
-
-  let sapling1 = loaded_sapling1.unwrap().into_rgba8();
-  let sapling2 = loaded_sapling2.unwrap().into_rgba8();
-  let sapling3 = loaded_sapling3.unwrap().into_rgba8();
-
-  match size {
-    1 => {
-      let mut image = RgbaImage::new(32, 32);
-      imageops::overlay(&mut image, &sapling1, 0, 0);
-
-      return image;
-    }
-    2 => {
-      let mut image = RgbaImage::new(64, 64);
-      imageops::overlay(&mut image, &sapling2, 0, 0);
-
-      return image;
-    }
-    3 => {
-      let mut image = RgbaImage::new(128, 128);
-      imageops::overlay(&mut image, &sapling3, 0, 0);
-
-      return image;
-    }
-    _ => {
-      println!("Invalid sapling size");
-      std::process::exit(0);
-    }
-  };
 }

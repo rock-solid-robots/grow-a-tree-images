@@ -432,6 +432,7 @@ name = "gat-image-server"
 version = "0.0.1"
 dependencies = [
  "image",
+ "rand",
  "rocket",
  "rocket_contrib",
  "serde",
