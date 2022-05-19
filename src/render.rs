@@ -37,25 +37,16 @@ pub fn create_image(tileset: &Tileset, tilemap: &TileMap) -> ImageBuffer<Rgba<u8
   return image;
 }
 
-pub fn render_treetop(trunk: ImageBuffer<Rgba<u8>, Vec<u8>>) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
-  let loaded_tree_base = match ImageReader::open("trees/base.png") {
-    Ok(file) => file.with_guessed_format().unwrap().decode(),
-    Err(_) => std::process::exit(0),
-  };
+pub fn render_treetop(
+  trunk: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+  tree_top: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+  background: &ImageBuffer<Rgba<u8>, Vec<u8>>,
+) -> ImageBuffer<Rgba<u8>, Vec<u8>> {
+  let mut image = RgbaImage::new(760, 464 + trunk.height());
 
-  let loaded_tree_top = match ImageReader::open("trees/top.png") {
-    Ok(file) => file.with_guessed_format().unwrap().decode(),
-    Err(_) => std::process::exit(0),
-  };
-
-  let tree_base = loaded_tree_base.unwrap().into_rgba8();
-  let tree_top = loaded_tree_top.unwrap().into_rgba8();
-
-  let mut image = RgbaImage::new(160, 288);
-
-  imageops::overlay(&mut image, &tree_top, 0, 0);
-  imageops::overlay(&mut image, &trunk, 64, 128);
-  imageops::overlay(&mut image, &tree_base, 0, 224);
+  imageops::overlay(&mut image, background, 0, 0);
+  imageops::overlay(&mut image, tree_top, 0, 0);
+  imageops::overlay(&mut image, trunk, 207, 464);
 
   return image;
 }

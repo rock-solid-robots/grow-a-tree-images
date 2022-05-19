@@ -2,11 +2,11 @@ version: '3'
 
 services:
 
-  tiling-image-server:
-    container_name: tiling-image-server
-    image: tiling-image-server:latest
+  gat-image-server:
+    container_name: gat-image-server
+    image: gat-image-server:latest
     ports:
       - "9090:9090"
     volumes:
-      - /var/www/tiling-images:/var/www/tiling-images
+      - /var/www/tiling-images/trees:/var/www/images
     restart: unless-stopped

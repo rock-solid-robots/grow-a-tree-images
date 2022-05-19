@@ -1,10 +1,27 @@
 FROM rustlang/rust:nightly-slim
 
-# 2. Copy the files in your machine to the Docker image
+COPY dummy.rs .
+
+# If this changed likely the Cargo.toml changed so lets trigger the
+# recopying of it anyways
+COPY Cargo.lock .
+COPY Cargo.toml .
+
+# We'll get to what this substitution is for but replace main.rs with
+# lib.rs if this is a library
+RUN sed -i 's/src\/main.rs/dummy.rs/' Cargo.toml
+
+# Drop release if you want debug builds. This step cache's our deps!
+RUN cargo build --release
+
+# Now return the file back to normal
+RUN sed -i 's/dummy.rs/src\/main.rs/' Cargo.toml
+
+# Copy the rest of the files into the container
 COPY . .
 
-# Build your program for release
+# Now this only builds our changes to things like src
 RUN cargo build --release
 
 # Run the binary
-CMD ["./target/release/tiling-image-server"]
+CMD ["./target/release/gat-image-server"]

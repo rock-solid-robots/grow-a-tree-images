@@ -1,2 +1,2 @@
-domain = "https://cdn.milesmoonlove.com"
-directory = "/var/www/tiling-images"
+domain = "https://cdn.milesmoonlove.com/trees"
+directory = "/var/www/images"
