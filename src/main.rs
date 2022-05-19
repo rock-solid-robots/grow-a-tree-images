@@ -39,7 +39,7 @@ fn main() {
   let config: Config = toml::from_str(&contents).unwrap();
 
   let tileset_manager: TilesetManager =
-    TilesetManager::new().load("trees", "./assets/tiles/", 400, 96);
+    TilesetManager::new().load("trees", "./src/assets/tiles/", 400, 96);
 
   rocket::ignite()
     .mount("/tree", routes![generate_treetop])
@@ -95,7 +95,7 @@ pub struct PreloadedImages {
 }
 
 fn preload_images() -> PreloadedImages {
-  let loaded_treetop = match Reader::open("./assets/treetop.png") {
+  let loaded_treetop = match Reader::open("./src/assets/treetop.png") {
     Ok(file) => file.with_guessed_format().unwrap().decode(),
     Err(_) => std::process::exit(0),
   };
@@ -104,18 +104,17 @@ fn preload_images() -> PreloadedImages {
 
   let mut backgrounds: Vec<RgbaImage> = vec![];
 
-  for image in fs::read_dir("./assets/backgrounds").unwrap() {
+  for file in fs::read_dir("./src/assets/backgrounds").unwrap() {
+    let image = match file {
+      Ok(i) => i,
+      Err(_) => panic!("Error accessing directory file."),
+    };
+
     println!("{:?}", image);
 
-    let loaded_image = match Reader::open("trees/background.png") {
+    let loaded_image = match Reader::open(image.path()) {
       Ok(file) => file.with_guessed_format().unwrap().decode(),
-      Err(_) => {
-        println!(
-          "Failed to load image: ./assets/backgrounds/{}",
-          image.unwrap().path().display()
-        );
-        continue;
-      }
+      Err(_) => panic!("Failed to load image: {}", image.path().display()),
     };
 
     backgrounds.push(loaded_image.unwrap().into_rgba8())
