@@ -7,7 +7,6 @@ extern crate rocket_contrib;
 #[macro_use]
 extern crate serde_derive;
 
-mod render;
 mod tiles;
 mod tree;
 
@@ -54,8 +53,6 @@ struct TreeRequest {
   pub id: String,
 
   pub background_id: usize,
-  pub size: u32,
-
   pub pieces: Vec<TileId>,
 }
 
@@ -66,15 +63,11 @@ fn generate_treetop(
   images: State<PreloadedImages>,
   data: Json<TreeRequest>,
 ) -> JsonValue {
-  let background_id = data.background_id;
-  let y_offset = if data.size <= 5 { -74 } else { 0 };
-
   let image = tree::draw_treetop(
     &tileset_manager.tilesets.get("trees").unwrap(),
     &images,
     &data.pieces,
-    background_id,
-    y_offset,
+    data.background_id,
   );
 
   let path = format!("{}/{}-treetop.png", config.directory, data.id);
