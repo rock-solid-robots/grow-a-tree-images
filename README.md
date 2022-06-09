@@ -19,3 +19,5 @@ pub struct TileMap {
 ```
 
 Tile maps are represented as an array of "Layers", each being a 2D array of tiles.
+
+Defaults to listening on port 9090, can be changed with the `ROCKET_PORT` env variable.

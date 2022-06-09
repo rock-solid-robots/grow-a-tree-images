@@ -10,7 +10,7 @@ extern crate serde_derive;
 mod tiles;
 mod tree;
 
-use std::fs;
+use std::{collections::HashMap, fs};
 
 use image::{io::Reader, RgbaImage};
 use rocket::State;
@@ -52,7 +52,7 @@ fn main() {
 struct TreeRequest {
   pub id: String,
 
-  pub background_id: usize,
+  pub background: String,
   pub pieces: Vec<TileId>,
 }
 
@@ -67,7 +67,7 @@ fn generate_treetop(
     &tileset_manager.tilesets.get("trees").unwrap(),
     &images,
     &data.pieces,
-    data.background_id,
+    &data.background,
   );
 
   let path = format!("{}/{}-treetop.png", config.directory, data.id);
@@ -84,7 +84,7 @@ fn generate_treetop(
 
 pub struct PreloadedImages {
   treetop: RgbaImage,
-  backgrounds: Vec<RgbaImage>,
+  backgrounds: HashMap<String, RgbaImage>,
 }
 
 fn preload_images() -> PreloadedImages {
@@ -95,7 +95,7 @@ fn preload_images() -> PreloadedImages {
 
   let treetop = loaded_treetop.unwrap().into_rgba8();
 
-  let mut backgrounds: Vec<RgbaImage> = vec![];
+  let mut backgrounds = HashMap::new();
 
   for file in fs::read_dir("./src/assets/backgrounds").unwrap() {
     let image = match file {
@@ -110,8 +110,15 @@ fn preload_images() -> PreloadedImages {
       Err(_) => panic!("Failed to load image: {}", image.path().display()),
     };
 
-    backgrounds.push(loaded_image.unwrap().into_rgba8())
+    let name = image.file_name().to_str().unwrap().to_string();
+
+    backgrounds.insert(
+      (name[0..name.len() - 4]).to_string(),
+      loaded_image.unwrap().into_rgba8(),
+    );
   }
+
+  println!("{:?}", backgrounds);
 
   return PreloadedImages {
     treetop,

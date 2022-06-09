@@ -20,18 +20,18 @@ pub fn draw_treetop(
   tileset: &Tileset,
   images: &PreloadedImages,
   pieces: &Vec<TileId>,
-  background_id: usize,
+  background: &String,
 ) -> RgbaImage {
   let trunk: RgbaImage = draw_trunk(tileset, pieces);
   let mut image: RgbaImage = RgbaImage::new(800, 1040);
 
-  let mut y_offset = if background_id == 0 { -74 } else { 0 };
+  let mut y_offset = if background == "Ground" { -74 } else { 0 };
 
   if pieces.len() < 5 {
-    y_offset += ((5 - pieces.len()) * 64) as i64;
+    y_offset += ((5 - pieces.len()) * tileset.height as usize) as i64;
   }
 
-  imageops::overlay(&mut image, &images.backgrounds[background_id], 0, 0);
+  imageops::overlay(&mut image, &images.backgrounds[background], 0, 0);
 
   imageops::overlay(&mut image, &images.treetop, 20, 96 + y_offset);
   imageops::overlay(&mut image, &trunk, 227, 560 + y_offset);
