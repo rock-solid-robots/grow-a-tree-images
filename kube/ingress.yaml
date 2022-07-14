@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: image-gen
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+      - '*.rocksolidrobots.net'
+      secretName: cloudflare-tls
+  rules:
+  - host: "image-gen.rocksolidrobots.net"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: image-gen
+            port:
+              number: 9090

@@ -3,39 +3,24 @@
 #[macro_use]
 extern crate rocket;
 #[macro_use]
-extern crate rocket_contrib;
-#[macro_use]
 extern crate serde_derive;
 
 mod tiles;
 mod tree;
 
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, io::Cursor};
 
-use image::{io::Reader, RgbaImage};
-use rocket::State;
-use rocket_contrib::json::{Json, JsonValue};
+use image::{io::Reader, ImageOutputFormat, RgbaImage};
+use rocket::{State, response::{Response, Responder}, http::{Status, ContentType}};
+use rocket_contrib::json::Json;
 use tiles::TileId;
-use uuid::Uuid;
 
 use crate::tiles::TilesetManager;
 
 use serde_derive::Deserialize;
 
-#[derive(Deserialize)]
-struct Config {
-  domain: String,
-  directory: String,
-}
-
 fn main() {
-  let contents = match fs::read_to_string("Config.toml") {
-    Ok(c) => c,
-    Err(_) => {
-      panic!("Could not read config file.");
-    }
-  };
-  let config: Config = toml::from_str(&contents).unwrap();
+  let backgrounds = preload_images();
 
   let tileset_manager: TilesetManager =
     TilesetManager::new().load("trees", "./src/assets/tiles/", 400, 96);
@@ -43,43 +28,36 @@ fn main() {
   rocket::ignite()
     .mount("/tree", routes![generate_treetop])
     .manage(tileset_manager)
-    .manage(config)
-    .manage(preload_images())
+    .manage(backgrounds)
     .launch();
 }
 
 #[derive(Deserialize)]
 struct TreeRequest {
-  pub id: String,
-
   pub background: String,
   pub pieces: Vec<TileId>,
 }
 
 #[post("/", format = "json", data = "<data>")]
-fn generate_treetop(
-  config: State<Config>,
+fn generate_treetop<'a>(
   tileset_manager: State<TilesetManager>,
   images: State<PreloadedImages>,
   data: Json<TreeRequest>,
-) -> JsonValue {
-  let image = tree::draw_treetop(
+) -> Response<'a> {
+  let mut buffer = Cursor::new(Vec::new());
+
+  tree::draw_treetop(
     &tileset_manager.tilesets.get("trees").unwrap(),
     &images,
     &data.pieces,
     &data.background,
-  );
+  )
+  .write_to(&mut buffer, ImageOutputFormat::Png)
+  .unwrap();
+  
+  let response = Response::build().status(Status::Ok).header(ContentType::PNG).sized_body(buffer).finalize();
 
-  let path = format!("{}/{}-treetop.png", config.directory, data.id);
-  image.save(path).unwrap();
-
-  let uuid = Uuid::new_v4();
-  let url = format!(
-    "{}/{}-treetop.png?cache-breaker={}",
-    config.domain, data.id, uuid
-  );
-
-  json!({ "status": "ok", "url": url })
+  return response;
 }
 
 pub struct PreloadedImages {
@@ -103,7 +81,7 @@ fn preload_images() -> PreloadedImages {
       Err(_) => panic!("Error accessing directory file."),
     };
 
-    println!("{:?}", image);
+    println!("Loading background: {:?}", image.path());
 
     let loaded_image = match Reader::open(image.path()) {
       Ok(file) => file.with_guessed_format().unwrap().decode(),
@@ -117,8 +95,6 @@ fn preload_images() -> PreloadedImages {
       loaded_image.unwrap().into_rgba8(),
     );
   }
-
-  println!("{:?}", backgrounds);
 
   return PreloadedImages {
     treetop,

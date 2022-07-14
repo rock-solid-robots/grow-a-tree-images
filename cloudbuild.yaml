@@ -1,0 +1,7 @@
+steps:
+  - name: 'gcr.io/kaniko-project/executor:latest'
+    args:
+      - --destination=gcr.io/$PROJECT_ID/$_DOCKER_IMAGE:$BUILD_ID
+      - --destination=gcr.io/$PROJECT_ID/$_DOCKER_IMAGE:latest
+      - --cache=true
+      - --cache-ttl=36h

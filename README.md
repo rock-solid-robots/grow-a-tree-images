@@ -1,23 +1,12 @@
-# Image Tiling Server
-
-Takes in a tilemap on `/`, saves the output image to the directory specified in config, and returns a url pointing there.
+# Grow a Tree - Image Server
 
 ```rust
-struct ImageRequest {
-  pub id: String,
-
-  pub tileset: String,
-  pub tiles: TileMap,
-}
-
-pub struct TileMap {
-  pub tiles: Vec<Vec<Vec<TileId>>>,
-
-  pub width: u32,
-  pub height: u32,
+struct TreeRequest {
+  pub background: String,
+  pub pieces: Vec<TileId>,
 }
 ```
 
-Tile maps are represented as an array of "Layers", each being a 2D array of tiles.
+Basic image compositing, specify a [background](./src/assets/backgrounds/) and an array of [tree tiles](./src/assets/tiles/) and a corresponding image will be generated.
 
-Defaults to listening on port 9090, can be changed with the `ROCKET_PORT` env variable.
+Defaults to listening on port 9090, but can be changed with a `ROCKET_PORT` env variable.

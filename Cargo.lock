@@ -426,21 +426,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "21163e139fa306126e6eedaf49ecdb4588f939600f0b1e770f4205ee4b7fa868"
 
 [[package]]
-name = "gat-image-server"
-version = "0.0.1"
-dependencies = [
- "image",
- "rand",
- "rocket",
- "rocket_contrib",
- "serde",
- "serde_derive",
- "serde_json",
- "toml 0.5.9",
- "uuid",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -584,6 +569,21 @@ dependencies = [
  "png",
  "scoped_threadpool",
  "tiff",
+]
+
+[[package]]
+name = "image-server"
+version = "0.0.1"
+dependencies = [
+ "image",
+ "rand",
+ "rocket",
+ "rocket_contrib",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "toml 0.5.9",
+ "uuid",
 ]
 
 [[package]]
