@@ -11,7 +11,11 @@ mod tree;
 use std::{collections::HashMap, fs, io::Cursor};
 
 use image::{io::Reader, ImageOutputFormat, RgbaImage};
-use rocket::{State, response::{Response, Responder}, http::{Status, ContentType}};
+use rocket::{
+  http::{ContentType, Status},
+  response::Response,
+  State,
+};
 use rocket_contrib::json::Json;
 use tiles::TileId;
 
@@ -54,8 +58,12 @@ fn generate_treetop<'a>(
   )
   .write_to(&mut buffer, ImageOutputFormat::Png)
   .unwrap();
-  
-  let response = Response::build().status(Status::Ok).header(ContentType::PNG).sized_body(buffer).finalize();
+
+  let response = Response::build()
+    .status(Status::Ok)
+    .header(ContentType::PNG)
+    .sized_body(buffer)
+    .finalize();
 
   return response;
 }
